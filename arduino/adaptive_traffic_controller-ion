@@ -1,0 +1,105 @@
+#define BAUD_RATE       115200
+#define MIN_GREEN_MS    3000
+#define MAX_GREEN_MS    100000
+#define YELLOW_MS       3000
+#define ALL_RED_MS      2000
+#define THRESHOLD_X10   15
+
+enum Phase { IDLE, NS_GREEN, NS_YELLOW, EW_GREEN, EW_YELLOW, ALL_RED };
+Phase currentPhase = IDLE;
+unsigned long phaseStart = 0;
+Phase nextPhase = IDLE;
+long north[4] = {0,0,0,0}, south[4] = {0,0,0,0}, east[4] = {0,0,0,0}, west[4] = {0,0,0,0};
+String rxBuffer = "";
+
+void setup() {
+  Serial.begin(BAUD_RATE);
+  while (!Serial) { ; }
+  sendCommand("ALL_RED");
+  currentPhase = ALL_RED; phaseStart = millis(); nextPhase = IDLE;
+}
+
+void loop() {
+  readSerial();
+  unsigned long elapsed = millis() - phaseStart;
+  switch (currentPhase) {
+    case IDLE: {
+      long ns = pairInitialScore(north, south), we = pairInitialScore(east, west);
+      if (ns > 0 || we > 0) { if (ns >= we) enterPhase(NS_GREEN); else enterPhase(EW_GREEN); }
+      break;
+    }
+    case NS_GREEN: {
+      if (elapsed >= MAX_GREEN_MS) { enterPhase(NS_YELLOW); nextPhase = EW_GREEN; break; }
+      if (elapsed < MIN_GREEN_MS) break;
+      long g = greenScore(north, south), r = redScore(east, west);
+      if ((g == 0 && elapsed > 5000 && r > 0) || (r * 10 > g * THRESHOLD_X10)) { enterPhase(NS_YELLOW); nextPhase = EW_GREEN; }
+      break;
+    }
+    case EW_GREEN: {
+      if (elapsed >= MAX_GREEN_MS) { enterPhase(EW_YELLOW); nextPhase = NS_GREEN; break; }
+      if (elapsed < MIN_GREEN_MS) break;
+      long g = greenScore(east, west), r = redScore(north, south);
+      if ((g == 0 && elapsed > 5000 && r > 0) || (r * 10 > g * THRESHOLD_X10)) { enterPhase(EW_YELLOW); nextPhase = NS_GREEN; }
+      break;
+    }
+    case NS_YELLOW: if (elapsed >= YELLOW_MS) enterPhase(ALL_RED); break;
+    case EW_YELLOW: if (elapsed >= YELLOW_MS) enterPhase(ALL_RED); break;
+    case ALL_RED:
+      if (elapsed >= ALL_RED_MS) {
+        if (nextPhase != IDLE) { enterPhase(nextPhase); nextPhase = IDLE; }
+        else {
+          long ns = pairInitialScore(north, south), we = pairInitialScore(east, west);
+          if (ns > 0 && ns >= we) enterPhase(NS_GREEN);
+          else if (we > 0) enterPhase(EW_GREEN);
+          else enterPhase(IDLE);
+        }
+      }
+      break;
+  }
+}
+
+void enterPhase(Phase p) {
+  currentPhase = p; phaseStart = millis();
+  switch (p) {
+    case NS_GREEN: sendCommand("NS_GREEN"); break;
+    case NS_YELLOW: sendCommand("NS_YELLOW"); break;
+    case EW_GREEN: sendCommand("EW_GREEN"); break;
+    case EW_YELLOW: sendCommand("EW_YELLOW"); break;
+    case ALL_RED: case IDLE: sendCommand("ALL_RED"); break;
+  }
+}
+
+void sendCommand(const char* cmd) { Serial.print(cmd); Serial.print('\n'); Serial.flush(); }
+
+long greenScore(long a[4], long b[4]) { return (a[2]+a[1])+(b[2]+b[1]); }
+long redScore(long a[4], long b[4]) {
+  return (a[0]*(a[3]/10)+a[1]) + (b[0]*(b[3]/10)+b[1]);
+}
+long pairInitialScore(long a[4], long b[4]) {
+  return (a[0]*(a[3]/10)+a[1]) + (b[0]*(b[3]/10)+b[1]);
+}
+
+void readSerial() {
+  while (Serial.available()) {
+    char c = Serial.read();
+    if (c == '\n') { parsePacket(rxBuffer); rxBuffer = ""; }
+    else if (c != '\r') { rxBuffer += c; if (rxBuffer.length() > 200) rxBuffer = ""; }
+  }
+}
+
+void parsePacket(String pkt) {
+  pkt.trim();
+  if (pkt.length() == 0) return;
+  long values[16]; int idx = 0, start = 0;
+  while (idx < 16) {
+    int comma = pkt.indexOf(',', start);
+    String token = (comma == -1) ? pkt.substring(start) : pkt.substring(start, comma);
+    token.trim(); values[idx++] = token.toInt();
+    if (comma == -1) break; start = comma + 1;
+  }
+  while (idx < 16) values[idx++] = 0;
+  north[0]=values[0]; north[1]=values[1]; north[2]=values[2]; north[3]=values[3];
+  south[0]=values[4]; south[1]=values[5]; south[2]=values[6]; south[3]=values[7];
+  east[0]=values[8]; east[1]=values[9]; east[2]=values[10]; east[3]=values[11];
+  west[0]=values[12]; west[1]=values[13]; west[2]=values[14]; west[3]=values[15];
+}
