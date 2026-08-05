@@ -44,6 +44,17 @@
                     </div>
                 </div>
                 <div class="control-section">
+                    <h3>Simulation Settings</h3>
+                    <div class="control-group">
+                        <label for="yellowDuration">Yellow Light Duration: <span id="yellowValue">3</span> s</label>
+                        <input type="range" id="yellowDuration" min="1" max="10" value="3" step="1" class="slider">
+                    </div>
+                    <div class="control-group">
+                        <label for="detectorDistance">Detector Distance: <span id="detectorValue">500</span> px</label>
+                        <input type="range" id="detectorDistance" min="100" max="500" value="500" step="10" class="slider">
+                    </div>
+                </div>
+                <div class="control-section">
                     <h3>Car Settings</h3>
                     <div class="control-group">
                         <label for="carSpawnRate">Spawn Rate: <span id="spawnValue">4</span> cars/10s</label>

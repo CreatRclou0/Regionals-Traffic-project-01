@@ -30,9 +30,11 @@ class TrafficSimulator {
                 const settings = {
                     CAR_SPAWN_RATE: Number(document.getElementById('carSpawnRate').value),
                     CAR_SPEED: Number(document.getElementById('carSpeed').value),
-                    DETECTOR_DISTANCE: this.gameEngine.getSettings().DETECTOR_DISTANCE
+                    DETECTOR_DISTANCE: Number(document.getElementById('detectorDistance').value),
+                    YELLOW_LIGHT_DURATION: Number(document.getElementById('yellowDuration').value)
                 };
                 this.gameEngine.updateSettings(settings);
+                this.gameEngine.getSerialController().setYellowDuration(settings.YELLOW_LIGHT_DURATION);
                 this.gameEngine.update(deltaTime);
             }
             this.gameEngine.render();

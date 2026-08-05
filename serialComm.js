@@ -35,7 +35,10 @@ export class SerialController {
         this.onCommand = null;
         this.onStatusChange = null;
         this.currentSensorData = null;
+        this.yellowDuration = 3;
     }
+
+    setYellowDuration(seconds) { this.yellowDuration = seconds; }
 
     isSupported() {
         return typeof navigator !== 'undefined' && 'serial' in navigator;
@@ -144,6 +147,7 @@ export class SerialController {
             const d = this.currentSensorData[dir] || {};
             parts.push(`${d.carsWaiting||0},${d.carsApproaching||0},${d.carsPassed||0},${((d.waitTime||0)/1000).toFixed(1)}`);
         }
+        parts.push(String(this.yellowDuration));
         return parts.join(',') + '\n';
     }
 

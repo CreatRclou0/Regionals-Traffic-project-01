@@ -64,6 +64,7 @@ export const CONFIG = {
         TURN_RATE: 0.4,              // 40% chance to turn (20% left, 20% right)
         DETECTOR_DISTANCE: 500,      // Increased range for adaptive mode
         MIN_GREEN_TIME: 5000,        // 5 seconds minimum green
+        YELLOW_LIGHT_DURATION: 3,    // 3 seconds (configurable via UI, sent to Arduino)
                     
     },
 

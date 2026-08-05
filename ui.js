@@ -10,7 +10,8 @@ export class UIController {
 
     initializeElements() {
         const ids = ['playPauseBtn','resetBtn','connectBtn','disconnectBtn','carSpawnRate','carSpeed',
-            'spawnValue','speedValue','carsPassedStat','avgWaitStat','currentCarsStat',
+            'spawnValue','speedValue','yellowDuration','yellowValue','detectorDistance','detectorValue',
+            'carsPassedStat','avgWaitStat','currentCarsStat',
             'northCountStat','southCountStat','eastCountStat','westCountStat',
             'north-light','east-light','south-light','west-light',
             'connStatus','lastTxPacket','lastRxCommand','currentSignal','roundTripMs',
@@ -30,6 +31,8 @@ export class UIController {
         this.elements.disconnectBtn.addEventListener('click', async () => { await this.gameEngine.getSerialController().disconnect(); });
         this._setupSlider('carSpawnRate', 'spawnValue', 'CAR_SPAWN_RATE');
         this._setupSlider('carSpeed', 'speedValue', 'CAR_SPEED');
+        this._setupSlider('yellowDuration', 'yellowValue', 'YELLOW_LIGHT_DURATION');
+        this._setupSlider('detectorDistance', 'detectorValue', 'DETECTOR_DISTANCE');
         const serial = this.gameEngine.getSerialController();
         serial.onStatusChange = (status, message) => { this._updateConnStatus(status, message); };
         this._updateConnStatus(serial.isConnected ? 'connected' : 'disconnected');
