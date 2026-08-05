@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traffic Simulator - Hardware-in-the-Loop</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Traffic Simulator - HIL</h1>
+            <span class="subtitle">Arduino-controlled adaptive intersection</span>
+        </header>
+        <div class="main-content">
+            <div class="game-area">
+                <canvas id="gameCanvas" width="1200" height="1200"></canvas>
+                <div class="game-controls">
+                    <button id="playPauseBtn" class="control-btn">Pause</button>
+                    <button id="resetBtn" class="control-btn">Reset</button>
+                </div>
+            </div>
+            <div class="control-panel">
+                <div class="control-section">
+                    <h3>Arduino Connection</h3>
+                    <div class="conn-row"><span id="connStatus" class="conn-status">DISCONNECTED</span></div>
+                    <div class="conn-buttons">
+                        <button id="connectBtn" class="control-btn">Connect</button>
+                        <button id="disconnectBtn" class="control-btn secondary">Disconnect</button>
+                    </div>
+                    <p class="info-text">The Arduino is the only traffic controller. Connect a compatible Arduino over USB Serial to enable adaptive signal decisions.</p>
+                </div>
+                <div class="control-section">
+                    <h3>Serial Debug</h3>
+                    <div class="debug-grid">
+                        <div class="debug-item"><span>Current Signal:</span><span id="currentSignal">ALL_RED</span></div>
+                        <div class="debug-item"><span>Last TX:</span><span id="lastTxPacket" class="mono">-</span></div>
+                        <div class="debug-item"><span>Last RX:</span><span id="lastRxCommand" class="mono">-</span></div>
+                        <div class="debug-item"><span>Round Trip:</span><span id="roundTripMs" class="mono">- ms</span></div>
+                        <div class="debug-item"><span>Packets Sent:</span><span id="packetsSent">0</span></div>
+                        <div class="debug-item"><span>Packets Received:</span><span id="packetsReceived">0</span></div>
+                        <div class="debug-item"><span>Serial Errors:</span><span id="serialErrors">0</span></div>
+                        <div class="debug-item"><span>Invalid Packets:</span><span id="invalidPackets">0</span></div>
+                    </div>
+                </div>
+                <div class="control-section">
+                    <h3>Car Settings</h3>
+                    <div class="control-group">
+                        <label for="carSpawnRate">Spawn Rate: <span id="spawnValue">4</span> cars/10s</label>
+                        <input type="range" id="carSpawnRate" min="1" max="20" value="4" class="slider">
+                    </div>
+                    <div class="control-group">
+                        <label for="carSpeed">Car Speed: <span id="speedValue">25</span>px/s</label>
+                        <input type="range" id="carSpeed" min="15" max="50" value="25" class="slider">
+                    </div>
+                </div>
+                <div class="control-section">
+                    <h3>Statistics</h3>
+                    <div class="stats">
+                        <div class="stat-item"><span>Cars Passed:</span><span id="carsPassedStat">0</span></div>
+                        <div class="stat-item"><span>Avg Wait Time:</span><span id="avgWaitStat">0.0s</span></div>
+                        <div class="stat-item"><span>Current Cars:</span><span id="currentCarsStat">0</span></div>
+                        <div class="stat-item"><span>Detected N:</span><span id="northCountStat">0</span></div>
+                        <div class="stat-item"><span>Detected S:</span><span id="southCountStat">0</span></div>
+                        <div class="stat-item"><span>Detected E:</span><span id="eastCountStat">0</span></div>
+                        <div class="stat-item"><span>Detected W:</span><span id="westCountStat">0</span></div>
+                    </div>
+                </div>
+                <div class="control-section">
+                    <h3>Light Status</h3>
+                    <div class="light-status-grid">
+                        <div class="light-status"><span>N</span><div class="status-light" id="north-light"></div></div>
+                        <div class="light-status"><span>E</span><div class="status-light" id="east-light"></div></div>
+                        <div class="light-status"><span>S</span><div class="status-light" id="south-light"></div></div>
+                        <div class="light-status"><span>W</span><div class="status-light" id="west-light"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="main.js"></script>
+</body>
+</html>
